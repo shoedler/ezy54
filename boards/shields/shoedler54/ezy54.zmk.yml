@@ -1,0 +1,12 @@
+file_format: "1"
+id: ezy54
+name: ezy54
+type: shield
+url: https://github.com/shoedler/ezy54
+requires: [nice_nano_v2]
+features:
+  - keys
+  - studio
+siblings:
+  - ezy54_left
+  - ezy54_right
