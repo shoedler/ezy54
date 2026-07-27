@@ -1,5 +1,3 @@
-# TODO: Fix gap between ring and index in toprows of switchplate.
-# TODO: Fix spike in the outermost thumbcluster top corner.
 # TODO: Fix cutouts for i/o (add angle)
 # TODO: Verify screwholes
 # TODO: Verify space for bat. How about a hole right next to the jst conn where
@@ -159,6 +157,10 @@ outlines:
       size: [cx+outline_ol_pad, cy]
       adjust.shift: [outline_ol_pad, cy]
       operation: subtract
+    - what: rectangle # Fixes gap between ring and middle cols (top)
+      where: matrix_c1_r4
+      size: [10, 20]
+      adjust.shift: [cx/2+5, (cy+outline_ol_pad)/2 - 10]
     - what: polygon # Bridge between matrix and thumb cluster.
       points:
         - ref: matrix_c2_r1
@@ -166,7 +168,7 @@ outlines:
         - ref: matrix_c3_r1
           shift: [-cx/2, -cy/2]
         - ref: matrix_c3_r1
-          shift: [3, -cy/2]
+          shift: [8, -cy/2]
         - ref: thumb_c3_r0
           shift: [-cx/2-outline_ol_pad, -cy/2-outline_ol_pad]
         - ref: thumb_c3_r0
@@ -180,7 +182,7 @@ outlines:
         - ref: thumb_c5_r0
           shift: [cx/2+outline_ol_pad, cy/2+outline_ol_pad]
         - ref: mcu
-          shift: [18/2+outline_ol_pad, -77]
+          shift: [18/2+outline_ol_pad, -71.5]
         - ref: mcu
           shift: [18/2+outline_ol_pad, shared_mcu_h/2]
         - ref: matrix_c5_r4
