@@ -104,9 +104,17 @@ Modifying the config will force you to reroute the PCB again. Though fear not - 
 > [!NOTE]
 > To add the Freerouting KiCad integration, just follow [this](https://github.com/freerouting/freerouting/blob/master/docs/integrations.md) official guide.
 
+> [!TIP]
+> There is a local toolchain in [`tools/`](tools/README.md) that builds the config without
+> ergogen.xyz and then checks it: case clearances, a pre-routing DRC on the generated board,
+> STL/cross-section/point-probe inspection of the printed parts, and layered drawings. Start
+> with `cd tools && npm run setup`, then `node tools/build.js` and
+> `python tools/drc_lite.py out/pcbs/ezy54.kicad_pcb`. Its README also documents ergogen's
+> y-mirroring gotcha, which silently mis-aims side-actuated switches and diodes on splayed keys.
+
 1. Paste `config.yml` located in `/ergogen` into [ergogen.xyz](ergogen.xyz) and download the `ezy54.kicad_pcb` file.
 2. Copy (and overwrite) `ezy54.kicad_pcb` to the `kicad` directory of this repository *(this part is only required if you intend to keep the source of this repository up to date - e.g. if you forked this)*
-3. Open the PCB in KiCad (Standalone PCB editor suffices) and click on `Tools > External Plugins > Freerouting`
+3. Open the PCB in KiCad (Standalone PCB editor suffices). Press `B` to fill the GND pours - zones come out of ergogen empty until KiCad calculates them once - then click on `Tools > External Plugins > Freerouting`
 4. Let it rip. In my experience, the defaults of Freerouting suffice.
 
 > [!IMPORTANT]

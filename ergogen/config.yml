@@ -21,8 +21,38 @@ units:
   pcb_screw_hole_size: 4.6 # NPTH annulus for the M2 clearance hole
   pcb_screw_drill: 2.2
   pcb_switch_pad_w: 2 # Outer hotswap pad width
-  pcb_diode_y_off: 3.5 # Diode, south of the switch it belongs to
+  # Diode placement relative to its switch.
+  #
+  # Ergogen mirrors y when it writes the board, so a footprint's own
+  # geometry ends up rotated by *twice* its key's rotation relative to the
+  # direction of an anchor shift. The diode therefore sits differently
+  # around each key, and on the -45 degree inner thumb it can land on the
+  # switch's plated centre hole or a Choc v1 stabiliser hole.
+  #
+  # These two are not derivable - they are the best spot found by
+  # `python tools/diode_fit.py`, which sweeps the offset against every
+  # switch pad and the board edge. Re-run it if the layout changes.
+  pcb_diode_x_off: -5
+  pcb_diode_y_off: 3.5
+  pcb_clearance: 0.2 # JLCPCB minimum copper to copper
+  pcb_edge_clearance: 0.3 # JLCPCB minimum copper to board edge
 
+  # ------------------------------------------------------------------
+  #  Copper pours
+  #
+  #  A GND pour on both layers, with the MCU footprint cut out of it: the
+  #  nice!nano v2 / SuperMini guidance is to keep copper from under the
+  #  module so its antenna is not detuned.
+  #
+  #  Zone polygons are written into the board verbatim, so unlike every
+  #  other number here they are *KiCad* coordinates - y points down, the
+  #  negation of ergogen's y - and they have to be literals, because
+  #  ergogen does not resolve unit names inside nested arrays. They live
+  #  next to the footprints in `pcbs:`. They are not derived, so
+  #  `python tools/drc_lite.py` asserts that the pour still covers the
+  #  board and the keepout still covers the MCU. Re-run it if you move
+  #  anything in the MCU column.
+  # ------------------------------------------------------------------
   # ------------------------------------------------------------------
   #  Key layout  (verified ergonomics - touch with care)
   #  cx / cy are ergogen's cap units: 18 x 17 mm.
@@ -127,14 +157,15 @@ units:
   # ------------------------------------------------------------------
   sw_body_h: 1.5 # Body height below the PCB
   sw_reset_x_off: -5 # From matrix_c5_r4
-  sw_reset_y_in: 1.75 # Centre below the board's north edge
+  sw_reset_y_in: 2.3 # Centre below the board's north edge; its mounting
+  # bosses reach 1.75mm north of that, so this keeps them off the edge.
   sw_reset_body_w: 4.72 # Courtyard
   sw_reset_body_d: 4.5 # 3.5 body + 1.0 actuator, which points north
   sw_reset_body_dy: 0.5 # ...so the body box is offset from the pad centre
   sw_reset_slot_dx: 0.65 # Actuator offset from the body centre
   sw_reset_slot_w: 3.6
   sw_power_x_off: 5
-  sw_power_y_in: 1.25
+  sw_power_y_in: 2.2 # Keeps its body pads off the board edge
   sw_power_body_w: 5.85 # Courtyard, incl. the actuator
   sw_power_body_d: 8.8
   sw_power_body_dx: 0.17 # Actuator makes the courtyard asymmetric
@@ -317,7 +348,9 @@ points:
       anchor:
         - ref: matrix_c5_r4
           shift: [sw_power_x_off, pcb_north_off - sw_power_y_in]
-          rotate: 90
+          # -90, not +90: ergogen mirrors footprint-y, so +90 aims the
+          # slider's actuator south, into the board.
+          rotate: -90
 
     reset_switch:
       key.tags:
@@ -458,13 +491,13 @@ outlines:
       size: [usb_win_w, case_io_mask_d]
       adjust.shift: [0, mcu_h/2 + case_io_mask_d/2]
 
-  _shroud_usb_sill: # Just the wall part of it, re-added below the window
+  _shroud_usb_sill: # Exactly the wall slice, re-added below the window.
+    # Must not overhang the wall: anything sticking out past shroud_n_off
+    # becomes a little block on the outside of the housing.
     - where: [mcu]
       what: rectangle
-      size: [usb_win_w, case_io_mask_d]
-      adjust.shift:
-        - 0
-        - shroud_n_off - case_shroud_n_wall_t + case_io_mask_d/2
+      size: [usb_win_w, case_shroud_n_wall_t]
+      adjust.shift: [0, shroud_n_off - case_shroud_n_wall_t/2]
 
   _shroud_bosses: # Support cylinders, PCB -> roof
     - where: [boss_screw]
@@ -479,8 +512,7 @@ outlines:
     - what: rectangle # Fixes gap between pinky and ring cols (top)
       where: matrix_c1_r4
       size: [outline_c1c2_fill_w, outline_c1c2_fill_h]
-      adjust.shift:
-        [outline_c1c2_fill_x, (cy+pcb_edge_pad)/2 - outline_c1c2_fill_h/2]
+      adjust.shift: [outline_c1c2_fill_x, (cy+pcb_edge_pad)/2 - outline_c1c2_fill_h/2]
     # The MCU column and the thumb bridge. The north edge is pinned to
     # the housing's north corners and the east edge runs from the inner
     # thumb key to the housing's NE corner, so the board always carries
@@ -812,7 +844,7 @@ pcbs:
           to: "{{row}}"
           reversible: true
           include_traces_vias: true
-        adjust.shift: [0, pcb_diode_y_off]
+        adjust.shift: [pcb_diode_x_off, pcb_diode_y_off]
         adjust.rotate: 180
 
       mcu:
@@ -861,6 +893,31 @@ pcbs:
           include_bosses: true
           include_silkscreen: true
           include_courtyard: true
+
+      gnd_pour: # Both layers. The polygon is absolute, so `where` is moot.
+        what: ceoloide/utility_filled_zone
+        where: mcu
+        params:
+          side: "F&B"
+          name: GND
+          net: GND
+          # KiCad coordinates, and literal: ergogen does not resolve unit
+          # names inside nested arrays. Only has to enclose the board.
+          points: [[135, 69], [285, 69], [285, 201], [135, 201]]
+
+      mcu_pour_keepout: # Keep the pour out from under the module
+        what: ceoloide/utility_keepout_zone
+        where: mcu
+        params:
+          side: "F&B"
+          name: MCU
+          copperpour_allowed: false
+          tracks_allowed: true
+          vias_allowed: true
+          pads_allowed: true
+          # KiCad coordinates, literal - see above. Covers the MCU
+          # footprint (253.03..271.95 x 83.79..117.39) plus ~0.5mm.
+          points: [[252.5, 83.3], [272.5, 83.3], [272.5, 117.9], [252.5, 117.9]]
 
       screws:
         what: ceoloide/mounting_hole_npth

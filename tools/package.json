@@ -1,0 +1,17 @@
+{
+  "name": "ezy54-tools",
+  "private": true,
+  "type": "commonjs",
+  "description": "Local ergogen build + verification tooling for ezy54",
+  "scripts": {
+    "setup": "npm install && npm run footprints",
+    "footprints": "node fetch-footprints.js",
+    "build": "node build.js",
+    "cases": "node cases.js"
+  },
+  "dependencies": {
+    "@jscad/csg": "^0.7.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "ergogen": "^4.2.1"
+  }
+}
