@@ -10,3 +10,7 @@ out/
 *.stl.tmp
 __pycache__/
 *.pyc
+
+# kicad files
+kicad/ezy54-backups/
+gerber/
