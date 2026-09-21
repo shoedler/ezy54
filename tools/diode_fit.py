@@ -17,7 +17,7 @@ import sys
 
 sys.path.insert(0, __file__.rsplit('\\', 1)[0].rsplit('/', 1)[0])
 import yaml
-from drc_lite import (parse, pads, poly_of_pad, poly_dist, board_edges, seg_point_dist)
+from drc_lite import (parse, pads, poly_of_pad, poly_dist, board_edges, seg_point_dist, rot)
 
 # SOD-123 footprint, as placed by ceoloide/diode_tht_sod123 (reversible SMD)
 PAD_PITCH, PAD_W, PAD_H = 1.65, 0.9, 1.2
@@ -39,13 +39,15 @@ def main():
     edges = board_edges(root)
 
     def diode_pad_polys(v, dx, dy):
+        # The anchor shift happens in ergogen's own (y-up) frame...
         a = math.radians(v['r'])
         ox = v['x'] + dx * math.cos(a) - dy * math.sin(a)
         oy = v['y'] + dx * math.sin(a) + dy * math.cos(a)
-        kx, ky = ox, -oy                      # ergogen -> kicad
+        kx, ky = ox, -oy                      # ...then ergogen negates y
         R = v['r'] + 180                      # adjust.rotate: 180
-        Rr = math.radians(R)
-        return [poly_of_pad((kx + lx * math.cos(Rr), ky + lx * math.sin(Rr)),
+        # ...and the footprint's own pads rotate KiCad style, which is the
+        # whole reason the diode sits differently around every key.
+        return [poly_of_pad((kx + rot(lx, 0, R)[0], ky + rot(lx, 0, R)[1]),
                             (PAD_W, PAD_H), R, 'rect') for lx in (-PAD_PITCH, PAD_PITCH)]
 
     def worst(dx, dy):

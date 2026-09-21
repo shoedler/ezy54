@@ -23,15 +23,13 @@ units:
   pcb_switch_pad_w: 2 # Outer hotswap pad width
   # Diode placement relative to its switch.
   #
-  # Ergogen mirrors y when it writes the board, so a footprint's own
-  # geometry ends up rotated by *twice* its key's rotation relative to the
-  # direction of an anchor shift. The diode therefore sits differently
-  # around each key, and on the -45 degree inner thumb it can land on the
-  # switch's plated centre hole or a Choc v1 stabiliser hole.
-  #
-  # These two are not derivable - they are the best spot found by
-  # `python tools/diode_fit.py`, which sweeps the offset against every
-  # switch pad and the board edge. Re-run it if the layout changes.
+  # The x offset is not actually required: the original [0, 3.5] passes
+  # `python tools/drc_lite.py` too. It was added in response to a phantom
+  # collision on the splayed thumb keys, which turned out to be a rotation
+  # sign bug in drc_lite (see tools/README.md). It is kept because pcb rev1
+  # was fabricated with it - revert to 0 for a future revision if you would
+  # rather have the shorter traces. tools/diode_fit.py sweeps the offset
+  # against every other pad and the board edge.
   pcb_diode_x_off: -5
   pcb_diode_y_off: 3.5
   pcb_clearance: 0.2 # JLCPCB minimum copper to copper

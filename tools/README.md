@@ -71,9 +71,15 @@ the generated board before routing, and again on `kicad/ezy54.kicad_pcb` after.
 On an unrouted board every net is reported as an unconnected item — that is
 expected, look at the `violations` group.
 
+### `python tools/test_rotation.py`
+
+A regression test for the one thing that has actually bitten this project — see
+"the rotation gotcha" below. Run it whenever you touch `drc_lite.rot()`.
+
 ### `python tools/diode_fit.py`
 
-Only needed if the key layout changes. See "the mirroring gotcha" below.
+Sweeps the diode anchor offset against every other pad and the board edge.
+Only needed if the key layout changes.
 
 ## Cases
 
@@ -123,30 +129,52 @@ ergogen's (y up), matching `points.yaml`.
 5. Back in KiCad: teardrops, then curvy tracks.
 6. `node tools/drc.js --pcb kicad/ezy54.kicad_pcb`.
 
-## The mirroring gotcha
+## The rotation gotcha
 
-Worth knowing before you move anything, because it is silent and it bit this
-board twice.
+Worth reading before you move a footprint, because it is silent and it cost a
+PCB revision.
 
-Ergogen works in a y-up coordinate system and negates y when it writes the
-KiCad board. Footprint bodies, though, are authored in KiCad's own y-down
-frame and are placed with a plain rotation. The result is that a footprint's
-internal geometry ends up rotated by **twice its key's rotation** relative to
-the direction of an `adjust.shift`.
+Ergogen works y-up and negates y when it writes the board. Footprint bodies,
+though, are authored in KiCad's own y-down frame and placed with a rotation of
+`key rotation + adjust.rotate`. To work out where a pad actually lands you need
+KiCad's rotation convention, and it is the counter-intuitive one: angles are
+counter-clockwise *as displayed*, and the file's y axis points down, so in file
+coordinates a footprint-local offset is rotated by **minus** the angle:
 
-Two consequences, both fixed in the current config:
+```
+x' =  x·cos(t) + y·sin(t)
+y' = -x·sin(t) + y·cos(t)
+```
 
-- **`rotate: 90` aims a side-actuated switch the wrong way.** The power
-  switch's slider pointed south, into the board, and its body pads hung off the
-  board edge. It is `rotate: -90` now.
-- **A diode at a fixed offset sits at a different angle around every key.** On
-  the −45° inner thumb it landed on the switch's plated centre hole. There is
-  no offset that is "correct" by construction, so `tools/diode_fit.py` sweeps
-  `pcb_diode_x_off` / `pcb_diode_y_off` against every other pad and the board
-  edge and reports the offsets with the most clearance. Re-run it if you change
-  splay, spread or stagger, and put the winner back into the config.
+Get that sign backwards and the y component of every footprint-internal offset
+flips on any rotated footprint. `tools/drc_lite.py` did exactly that at first,
+and it produced two confident, wrong conclusions:
 
-This is not an ergogen bug — the whole board is mirrored consistently, which is
-why the two halves come off one PCB and why one case half gets flipped in the
-slicer. It only bites when a footprint's own geometry has to line up with
-something positioned in ergogen's frame.
+- it said `rotate: 90` aimed the power switch's slider south into the board, so
+  the config was changed to `-90`. It does not - `90` is correct, and `-90` is
+  what actually pointed it the wrong way.
+- it said diode pads on the splayed thumb keys collided with the switch's
+  plated centre hole, which led to an unnecessary `pcb_diode_x_off`.
+
+With the correct convention there is no dependence on the key's rotation at
+all. Substituting `R = r + A` into the two transforms gives a footprint-local
+offset, expressed in its own key's frame, of
+
+```
+Lx = lx·cos(A) + ly·sin(A)
+Ly = lx·sin(A) - ly·cos(A)
+```
+
+— only `adjust.rotate` appears. A footprint's geometry sits in the same place
+relative to every key, however splayed.
+
+`python tools/test_rotation.py` pins this down: it compares drc_lite's computed
+hole positions against the Excellon coordinates KiCad itself produced, read out
+of the committed `kicad/gerber.zip`. Correct convention matches to 0.0005mm;
+the wrong one misses 4 of 10 holes by up to 0.154mm. Run it after touching
+`drc_lite.rot()`.
+
+What *did* survive the correction: the reset and power switches genuinely need
+`sw_reset_y_in` / `sw_power_y_in` around 2.3 / 2.2. At the original 1.75 / 1.25
+the power switch's mounting pads cross the board edge and the reset switch's
+mounting boss sits exactly on it, whichever convention you use.

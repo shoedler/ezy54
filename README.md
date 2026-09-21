@@ -109,8 +109,8 @@ Modifying the config will force you to reroute the PCB again. Though fear not - 
 > ergogen.xyz and then checks it: case clearances, a pre-routing DRC on the generated board,
 > STL/cross-section/point-probe inspection of the printed parts, and layered drawings. Start
 > with `cd tools && npm run setup`, then `node tools/build.js` and
-> `python tools/drc_lite.py out/pcbs/ezy54.kicad_pcb`. Its README also documents ergogen's
-> y-mirroring gotcha, which silently mis-aims side-actuated switches and diodes on splayed keys.
+> `python tools/drc_lite.py out/pcbs/ezy54.kicad_pcb`. Its README also documents the
+> footprint rotation convention that ergogen + KiCad make easy to get backwards.
 
 1. Paste `config.yml` located in `/ergogen` into [ergogen.xyz](ergogen.xyz) and download the `ezy54.kicad_pcb` file.
 2. Copy (and overwrite) `ezy54.kicad_pcb` to the `kicad` directory of this repository *(this part is only required if you intend to keep the source of this repository up to date - e.g. if you forked this)*

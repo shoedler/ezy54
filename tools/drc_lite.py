@@ -59,8 +59,16 @@ def nums(node, n):
 
 
 def rot(x, y, deg):
+    """Rotate a footprint-local offset into board coordinates, KiCad style.
+
+    KiCad footprint/pad angles are counter-clockwise *as displayed*, and the
+    file's y axis points down, so in file coordinates the transform is a
+    rotation by -deg, not +deg. Getting this backwards silently misplaces the
+    pads of every rotated footprint. tools/test_rotation.py pins it against
+    KiCad's own drill output.
+    """
     a = math.radians(deg)
-    return x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a)
+    return x * math.cos(a) + y * math.sin(a), -x * math.sin(a) + y * math.cos(a)
 
 
 def poly_of_pad(pad_pos, size, angle, shape, rratio=0.0):
@@ -309,7 +317,14 @@ def main():
     bxs = [pt[0] for sg in edges for pt in sg]
     bys = [pt[1] for sg in edges for pt in sg]
     board = (min(bxs), min(bys), max(bxs), max(bys))
-    pour = next((z for z in zs if not z['keepout']), None)
+    # A routed board picks up extra small zones (teardrops, stitching), so
+    # take the biggest non-keepout zone as "the pour".
+    def bbox_area(z):
+        xs = [q[0] for q in z['pts']]
+        ys = [q[1] for q in z['pts']]
+        return (max(xs) - min(xs)) * (max(ys) - min(ys))
+    pours = sorted((z for z in zs if not z['keepout']), key=bbox_area, reverse=True)
+    pour = pours[0] if pours else None
     keep = next((z for z in zs if z['keepout']), None)
     if not pour:
         print('  FAIL no copper pour found'); fails += 1
