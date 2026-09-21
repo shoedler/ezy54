@@ -24,11 +24,11 @@ units:
   # Diode placement relative to its switch.
   #
   # The x offset is not actually required: the original [0, 3.5] passes
-  # `python tools/drc_lite.py` too. It was added in response to a phantom
+  # `node tools/drc-lite.ts` too. It was added in response to a phantom
   # collision on the splayed thumb keys, which turned out to be a rotation
-  # sign bug in drc_lite (see tools/README.md). It is kept because pcb rev1
-  # was fabricated with it - revert to 0 for a future revision if you would
-  # rather have the shorter traces. tools/diode_fit.py sweeps the offset
+  # sign bug in the tooling (see tools/README.md). It is kept because pcb
+  # rev1 was fabricated with it - revert to 0 for a future revision if you
+  # would rather have the shorter traces. tools/diode-fit.ts sweeps the offset
   # against every other pad and the board edge.
   pcb_diode_x_off: -5
   pcb_diode_y_off: 3.5
@@ -47,7 +47,7 @@ units:
   #  negation of ergogen's y - and they have to be literals, because
   #  ergogen does not resolve unit names inside nested arrays. They live
   #  next to the footprints in `pcbs:`. They are not derived, so
-  #  `python tools/drc_lite.py` asserts that the pour still covers the
+  #  `node tools/drc-lite.ts` asserts that the pour still covers the
   #  board and the keepout still covers the MCU. Re-run it if you move
   #  anything in the MCU column.
   # ------------------------------------------------------------------
