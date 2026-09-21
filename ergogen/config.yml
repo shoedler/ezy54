@@ -348,9 +348,8 @@ points:
       anchor:
         - ref: matrix_c5_r4
           shift: [sw_power_x_off, pcb_north_off - sw_power_y_in]
-          # -90, not +90: ergogen mirrors footprint-y, so +90 aims the
-          # slider's actuator south, into the board.
-          rotate: -90
+          # +90 puts the slider's actuator out at the board's north edge.
+          rotate: 90
 
     reset_switch:
       key.tags:
