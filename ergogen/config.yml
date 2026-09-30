@@ -162,6 +162,7 @@ units:
   sw_reset_body_dy: 0.5 # ...so the body box is offset from the pad centre
   sw_reset_slot_dx: 0.65 # Actuator offset from the body centre
   sw_reset_slot_w: 3.6
+  sw_reset_slot_pad: 2 # L/R Padding
   sw_power_x_off: 5
   sw_power_y_in: 2.2 # Keeps its body pads off the board edge
   sw_power_body_w: 5.85 # Courtyard, incl. the actuator
@@ -253,7 +254,8 @@ units:
   sw_power_slot_margin: 1.5
   sw_reset_slot_e: sw_reset_x_off + sw_reset_slot_dx + sw_reset_slot_w / 2
   sw_power_slot_e: mcu_x_off + shroud_w_off - sw_power_slot_margin
-  sw_power_slot_w: sw_power_slot_e - sw_reset_slot_e
+  sw_power_slot_w: sw_power_slot_e - sw_reset_slot_e + sw_reset_slot_pad
+  sw_power_slot_h: 11
   sw_power_slot_x: (sw_power_slot_e + sw_reset_slot_e) / 2
 
   # ------------------------------------------------------------------
@@ -682,16 +684,12 @@ outlines:
       adjust.shift:
         - sw_reset_x_off + sw_reset_slot_dx
         - pcb_north_off - case_io_mask_overlap + case_io_mask_d/2
-    - what: rectangle # USB-C, in the wall in front of the housing
-      where: [mcu]
-      size: [usb_win_w, case_io_mask_d]
-      adjust.shift: [0, shroud_n_off - case_io_mask_overlap + case_io_mask_d/2]
 
   _case_wall_power_sw_mask: # Full height - needs finger access, and runs
     # west until it meets the reset opening so no post is left between them.
     - what: rectangle
       where: [matrix_c5_r4]
-      size: [sw_power_slot_w, case_io_mask_d]
+      size: [sw_power_slot_w, sw_power_slot_h]
       adjust.shift:
         - sw_power_slot_x
         - pcb_north_off - case_io_mask_overlap + case_io_mask_d/2
@@ -703,13 +701,6 @@ outlines:
       name: _case_wall
     - what: outline
       name: _case_wall_io_mask
-      operation: intersect
-
-  _case_power_opening:
-    - what: outline
-      name: _case_wall
-    - what: outline
-      name: _case_wall_power_sw_mask
       operation: intersect
 
   # Built from the same chain as _case_wall rather than by subtracting
@@ -776,16 +767,19 @@ outlines:
     - what: outline
       name: ezy54
       expand: case_wall_expand + carry_fit
+      joints: pointy
 
   _carry_case_inset_mask:
     - what: outline
       name: ezy54
       expand: case_wall_expand + carry_fit - carry_lip_w
+      joints: pointy
 
   _carry_case_frame:
     - what: outline
       name: _case_bottom
       expand: carry_fit + carry_wall_t
+      joints: beveled
     - what: outline
       name: _carry_case_mask
       operation: subtract
