@@ -1,9 +1,22 @@
-> [!CAUTION]
-> This is a WIP - this keyboard has not been built yet.
+<img width="4000" height="3000" alt="keyboard-hero" src="https://github.com/user-attachments/assets/912e2ec0-1f34-44b0-8b41-8a9e0d0f97f5" />
+
+> Kailh Choc v1 pinks, Chosfox CFX
 
 # ezy54
 A 54-key, column-staggered, ortholinear, wireless split keyboard, inspired by ZSA Voyager and totem.
 Designed for Choc-spacing (18mm horizontal, 17mm vertical) and 1350 Choc v1 or v2 switches.
+
+## Impressions
+
+<img width="4000" height="3000" alt="keyboard-left" src="https://github.com/user-attachments/assets/64f6077a-da38-45d5-9764-d18071b39f98" />
+
+> Left
+
+<img width="4000" height="3000" alt="keyboard-bottom" src="https://github.com/user-attachments/assets/18541446-7abb-4e68-9b98-a4b11710b0f2" />
+
+> Carry Case
+
+<img width="4000" height="3000" alt="keyboard-top" src="https://github.com/user-attachments/assets/f007dd71-e5a4-4172-9491-80d7a7c4b7e7" />
 
 ---
 
@@ -12,6 +25,7 @@ Designed for Choc-spacing (18mm horizontal, 17mm vertical) and 1350 Choc v1 or v
 For one complete board - e.g. two halves - you'll need:
 
 - 2 Promicro NRF52840
+- 2x 12-pin 0.1" (2.54mm) Pitch **3.5mm tall** Pin headers, female. *I just ordered 40-pin lengths and cut them to size.* (optional, but highly recommended). 
 - 54 1N4148W SOD-123 Diodes
 - 54 Kailh Low-profile 1350 Hotswap Sockets
 - 54 Keyswitches, Choc v1 or v2
@@ -24,8 +38,9 @@ For one complete board - e.g. two halves - you'll need:
 For the case you'll need:
 
 - Obviously, the printed case files. See section about printing below.
-- 10x M2x5 (or 6)mm flathead screws
-- 10x M2x3mm Heat set inserts
+- 8x M2x6mm flathead screws
+- 4x M2x14mm (or 12mm) flathead screws
+- 12x M2x3mm Heat set inserts
 - Optionally, some painters tape.
 
 ## Build guide
@@ -46,20 +61,27 @@ I used a Babulab A1 mini and default slicer settings (Bambustudio). Everything w
 
 You'll need at least:
 
-- 2x `ezy54_switchplate_right.stl`, which is the plate that sits on the PCB and where the keyswitches are mounted into - I recommend using the provided 3mf files for that: `ezy54_switchplate_left.3mf` and `ezy54_switchplate_right.3mf`. That'll give you mirrored versions so you have the buildplate-finish texture on the same side for both halves.
-- 2x `ezy54_case_left.stl`, which is the case where the PCB gets mounted in - same story, use the provided 3mf files for that: `ezy54_case_left.3mf` and `ezy54_case_right.3mf`. That'll also give you mirrored versions for both halves with fuzzy skin. Theoretically, you don't **need** the case, but I strongly recommend it to provide a little bit of protection for the PCB. If you're working directly with the stl, then you'll have to mirror it. I suggest using the fuzzy skin setting (in Bambustudio: `Others > Special mode > Fuzzy skin`, use "Contour").
+- 2x `ezy54_switchplate_left.stl`, which is the plate that sits on the PCB and where the keyswitches are mounted into - I recommend using the provided 3mf files for that: `ezy54_switchplate_left.3mf` and `ezy54_switchplate_right.3mf`. That'll give you mirrored versions so you have the buildplate-finish texture on the same side for both halves. 
+- 2x `ezy54_case_left.stl`, which is the case where the PCB gets mounted in - same story, use the provided 3mf files for that: `ezy54_case_left.3mf` and `ezy54_case_right.3mf`. That'll also give you mirrored versions for both halves. Theoretically, you don't **need** the case, but I strongly recommend it to provide a little bit of protection for the PCB. If you're working directly with the stl, then you'll have to mirror it. I suggest using the fuzzy skin setting (in Bambustudio: `Others > Special mode > Fuzzy skin`, use "Contour").
 
 Optional:
 
-- 2x `ezy54_case_cover_right.stl`, which is a small cover for the MCU + battery. Use `ezy54_case_cover_left.3mf` and `ezy54_case_cover_right.3mf` for mirrored version. Same as with the case, if you're working with the stl directly you'll need to mirror this too.
-- 1x `ezy54_carry_case.stl`, which is a Go60-ish carry shell for the ezy54. Use `ezy54_carry_case.3mf` for a version with fuzzy skin. I did manage to print it without support, but there's a bit of luck involved.
+- 1x `ezy54_carry_case.stl`, which is a Go60-ish carry shell for the ezy54. Use `ezy54_carry_case.3mf` for a basic. I did manage to print it without support, but there's a bit of luck involved - the 3mf file uses supports.
 
 ### Soldering
 
-Since the PCB is reversible it can get confusing quick. All of the components **except the ProMicro and the JST connector** are soldered to the backside of each half.
+Since the PCB is reversible it can get confusing quick. All of the components **except the ProMicro headers and the JST Battery connector** are soldered to the backside of each half.
 
-1. Solder diodes, hotswap sockets, reset- and powerswitches on the backside of each half. **This is also the side were you bridge all of the solder-jumpers with solder** (8 for the Mcu, 2 for the Battery connector).
-2. Direct-solder the ProMicro to the frontside of the PCB, along with the JST connector. (Pin Sockets are also an option for the mcu, if you want - it just makes the keyboard a bit thicker)
+1. Solder diodes, kailh hotswap sockets, reset- and powerswitches on the backside of each half. **This is also the side were you bridge all of the solder-jumpers with solder** (8 for the Mcu, 2 for the Battery connector).
+2. If you have ordered the female 3.5mm tall pin headers, solder them to the front. If not, direct solder the ProMicro to the frontside of the PCB. Also solder on the JST connector to the frontside.
+3. Prep the ProMicro. They are usually delivered with male pin headers. You need to solder them flush in order to ensure the MCU will fit into the case. Here's the process I have used:
+<img width="9096" height="4000" alt="build-steps" src="https://github.com/user-attachments/assets/b4dd1b9a-5aab-45ff-a1e8-37dcb3f9aa5e" />
+
+- left image: Push the pins, until they are almost flush with the plastic - a little (0.2mm) protrusion is ok. Ensure they are at the same depth.
+- middle image: Insert the pins, MCU sits on the plastic, they act as the spacer for the insertion depth into the female header on the PCB. Tack-solder the outermost pins from the top (as shown in image).
+- right image: Cut the pins flush with the MCU, then solder from the top. Do not use too much solder - we want to prevent the solder seeping through to the underside and forming a teardrop. Then, remove the plastic carefully - I have used a pair of flush cutters to gently lift it.
+
+4. Mount the MCU to the header. Battery can wait for now.
 
 > [!CAUTION]
 > Before you continue it's a good idea to verify that there's no short between the JSTs +/- terminal as well as the ProMicros VCC and GND.
@@ -70,7 +92,7 @@ I suggest to load the firmware next and check that everything works before assem
 
 > Firmware related files consist of: config/, boards/, zephyr/ directories, as well as the build.yml file and the GitHub Actions workflow in .github/workflows.build.yml
 
-Get the latest firmware from https://github.com/shoelder/ezy54/actions, select the latest run and scroll down to Artifacts - you'll be able to download the zip archive from there.
+Get the latest firmware from https://github.com/shoelder/ezy54/actions, select the latest run and scroll down to Artifacts - you'll be able to download the zip archive from there. If the last runs artifact is expired, just fork the repo and trigger a build.
 
 > [!NOTE]
 > There'll be two .uf2 files per half in the zip archive - a `de-ch` and an `en` version. This refers to the keycode locale that's been used. I myself require a swiss locale, but, to make the default firmware more useful for more people, I've added an english version too. You can check the keymaps out in the `config/boards/shields/ezy54` directory.
@@ -86,13 +108,12 @@ For each half:
 
 ### Assembly
 
-1. Prep the cases by installing the heat set inserts.
-2. Cover the bottom sides of the PCBs with tape (I used masking tape). Apply the first layer quite firmly, such that it follows the contours of the hotswap sockets. You'll want to make sure that you extend the tape over the edges of the PCB. Apply at least 3 layers. In my experience anything beyond 5 layers of standard painters tape yields no further improvements. Also, it gets thick quick.
-3. Trace the PCB outline to the tape with a pen. Also, trace the screw holes.
-4. Remove the tape, and cut out the shape - make sure to inset the cut about 2-3mm, so the tape is not visible when everything is assembled. For the screw holes, cut a ~5x5mm square. Apply the tape.
-5. Assemble both halves.
-6. Install the switches, caps and the battery. For the battery, I usually use a thin, clear double-sided tape. Done!
-
+1. Mount the battery to the frontside - I suggest a thin double-sided tape to keep it in place for easier assembly. It goes just below the MCU.
+2. Mount the switchplate to the frontside - ensure it sits flush. The MCUs USB-C should be perfectly aligned to its cutout in the print.
+3. Prep the lower cases halves by installing the heat set inserts.
+4. Optional, but highly recommended for better sound: Cover the bottom sides of the PCBs with tape (I used masking tape). Apply the first layer quite firmly, such that it follows the contours of the hotswap sockets. You'll want to make sure that you extend the tape over the edges of the PCB. Apply at least 3 layers. In my experience anything beyond 5 layers of standard painters tape yields no further improvements. Also, it gets thick quick. Trace the PCB outline to the tape with a pen. Also, trace the screw holes. Remove the tape, and cut out the shape - make sure to inset the cut about 2-3mm, so the tape is not visible when everything is assembled. For the screw holes, cut a ~5x5mm square. Apply the tape. (There is a more detailed guile to the exact same process on the shoedler54 README: https://github.com/shoedler/shoedler54)
+5. Assemble both halves and mount the screws.
+6. Install the switches. Done!
 
 ---
 
